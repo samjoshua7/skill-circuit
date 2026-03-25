@@ -9,22 +9,19 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
-  const [dbUser, setDbUser] = useState(null); // the user from our MongoDB
+  const [dbUser, setDbUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
-        // Find existing user in DB, or wait until they sign in & send data to /api/auth/google
         try {
-          // A real app would verify JWT, we will just use a GET or rely on login to set it
-          // For MVP we will set it during login popup.
           const storedUser = localStorage.getItem('dbUser');
           if (storedUser) {
             setDbUser(JSON.parse(storedUser));
           }
-        } catch (err) { }
+        } catch (err) {}
       } else {
         setDbUser(null);
         localStorage.removeItem('dbUser');
@@ -37,7 +34,6 @@ export const AuthProvider = ({ children }) => {
   const loginWithGoogle = async (role = 'Customer', panOrGstin = '') => {
     const result = await signInWithPopup(auth, googleProvider);
     const { user } = result;
-    // Send to backend
     const res = await axios.post('http://localhost:5000/api/auth/google', {
       name: user.displayName,
       email: user.email,
@@ -50,13 +46,22 @@ export const AuthProvider = ({ children }) => {
     return res.data;
   };
 
+  // Call this after any wallet operation to sync the new balance locally
+  const updateDbUser = (updatedFields) => {
+    setDbUser(prev => {
+      const merged = { ...prev, ...updatedFields };
+      localStorage.setItem('dbUser', JSON.stringify(merged));
+      return merged;
+    });
+  };
+
   const logout = () => {
     signOut(auth);
     setDbUser(null);
     localStorage.removeItem('dbUser');
   };
 
-  const value = { currentUser, dbUser, loginWithGoogle, logout };
+  const value = { currentUser, dbUser, loginWithGoogle, logout, updateDbUser };
 
   return (
     <AuthContext.Provider value={value}>

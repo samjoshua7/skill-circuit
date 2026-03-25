@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 const CustomerDashboard = ({ user }) => {
   return (
@@ -15,14 +15,18 @@ const CustomerDashboard = ({ user }) => {
 };
 
 const VendorDashboard = ({ user }) => {
+  const navigate = useNavigate();
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">Vendor Portal</h2>
       <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-bold">My Services</h3>
-          <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition">
-            Add New Service
+          <button
+            onClick={() => navigate('/create-service')}
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition"
+          >
+            + Add New Service
           </button>
         </div>
         <p className="text-slate-500">You haven't posted any services yet.</p>

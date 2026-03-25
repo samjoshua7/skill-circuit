@@ -1,50 +1,70 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogOut } from 'lucide-react';
+import { Menu, Zap } from 'lucide-react';
 
-const Navbar = () => {
-  const { dbUser, logout } = useAuth();
-  const navigate = useNavigate();
+const Navbar = ({ onMenuToggle }) => {
+  const { dbUser } = useAuth();
+  const isAdmin  = dbUser?.role === 'Admin';
+  const isVendor = dbUser?.role === 'Vendor';
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
-  };
+  const homeUrl = dbUser
+    ? isAdmin ? '/admin-dashboard' : isVendor ? '/vendor-dashboard' : '/marketplace'
+    : '/';
 
   return (
-    <nav className="bg-white shadow-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <Link to="/" className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-              Skill Circuit
-            </Link>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <Link to="/services" className="text-gray-700 hover:text-blue-600 font-medium">Services</Link>
-            
-            {!dbUser ? (
-              <Link to="/login" className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition">
-                Login / Register
-              </Link>
-            ) : (
-              <>
-                <Link to="/dashboard" className="text-gray-700 hover:text-blue-600 font-medium">Dashboard</Link>
-                <button 
-                  onClick={handleLogout}
-                  className="flex items-center text-gray-700 hover:text-red-600 font-medium"
-                >
-                  <LogOut className="w-5 h-5 mr-1" />
-                  Logout
-                </button>
-              </>
-            )}
-          </div>
+    <header className="h-14 bg-white border-b border-slate-100 sticky top-0 z-30 flex items-center px-4 gap-3 shadow-sm">
+      {/* Hamburger — mobile only, only when logged in */}
+      {dbUser && (
+        <button
+          onClick={onMenuToggle}
+          className="lg:hidden p-2 -ml-1 rounded-lg text-slate-500 hover:bg-slate-100 active:bg-slate-200 transition"
+          aria-label="Toggle menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+      )}
+
+      {/* Logo */}
+      <Link to={homeUrl} className="flex items-center gap-2 flex-shrink-0">
+        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
+          <Zap className="w-4 h-4 text-white" strokeWidth={2.5} />
         </div>
-      </div>
-    </nav>
+        <span className="font-extrabold text-slate-800 text-[15px] tracking-tight">
+          Skill Circuit
+        </span>
+        {isAdmin && (
+          <span className="text-[10px] bg-rose-100 text-rose-700 font-extrabold px-2 py-0.5 rounded-full border border-rose-200 tracking-wide">
+            ADMIN
+          </span>
+        )}
+      </Link>
+
+      {/* Spacer */}
+      <div className="flex-1" />
+
+      {/* Guest CTA */}
+      {!dbUser && (
+        <Link
+          to="/login"
+          className="bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition shadow-sm shadow-blue-200"
+        >
+          Login / Register
+        </Link>
+      )}
+
+      {/* Logged-in user: small avatar chip */}
+      {dbUser && (
+        <div className="flex items-center gap-2 pl-2 border-l border-slate-100">
+          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
+            {dbUser.name?.charAt(0)?.toUpperCase()}
+          </div>
+          <span className="text-sm font-medium text-slate-700 hidden sm:block max-w-[120px] truncate">
+            {dbUser.name?.split(' ')[0]}
+          </span>
+        </div>
+      )}
+    </header>
   );
 };
 

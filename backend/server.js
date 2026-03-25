@@ -20,6 +20,8 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/services', require('./routes/serviceRoutes'));
 app.use('/api/bookings', require('./routes/bookingRoutes'));
 app.use('/api/reviews', require('./routes/reviewRoutes'));
+app.use('/api/wallet', require('./routes/walletRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 
 app.get('/', (req, res) => {
   res.send('Skill Circuit API is running');
